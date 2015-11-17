@@ -59,6 +59,20 @@ def parse_debug(method):
     else:
         return method
 
+
+def add_position(method):
+    
+    def _method(self):
+        start = self.tokens.look().position
+        node = method(self)
+        if node:
+            node.position.start = start
+            node.position.end = self.tokens.look().position
+
+        return node
+
+    return _method
+    
 # ------------------------------------------------------------------------------
 # ---- Parsing exception ----
 
@@ -305,6 +319,7 @@ class Parser(object):
                                     types=type_declarations)
 
     @parse_debug
+    @add_position
     def parse_import_declaration(self):
         qualified_identifier = list()
         static = False
@@ -341,6 +356,7 @@ class Parser(object):
             return self.parse_class_or_interface_declaration()
 
     @parse_debug
+    @add_position
     def parse_class_or_interface_declaration(self):
         modifiers, annotations, javadoc = self.parse_modifiers()
         type_declaration = None
@@ -655,6 +671,7 @@ class Parser(object):
         return annotations
 
     @parse_debug
+    @add_position
     def parse_annotation(self):
         qualified_identifier = None
         annotation_element = None
@@ -774,6 +791,7 @@ class Parser(object):
             return self.parse_member_declaration()
 
     @parse_debug
+    @add_position
     def parse_member_declaration(self):
         modifiers, annotations, javadoc = self.parse_modifiers()
         member = None
@@ -951,6 +969,7 @@ class Parser(object):
         return declarations
 
     @parse_debug
+    @add_position
     def parse_interface_body_declaration(self):
         if self.try_accept(';'):
             return None
@@ -1016,6 +1035,7 @@ class Parser(object):
         return rest
 
     @parse_debug
+    @add_position
     def parse_constant_declarators_rest(self):
         array_dimension, initializer = self.parse_constant_declarator_rest()
         declarators = [tree.VariableDeclarator(dimensions=array_dimension,
@@ -1036,6 +1056,7 @@ class Parser(object):
         return (array_dimension, initializer)
 
     @parse_debug
+    @add_position
     def parse_constant_declarator(self):
         name = self.parse_identifier()
         additional_dimension, initializer = self.parse_constant_declarator_rest()
@@ -1148,19 +1169,7 @@ class Parser(object):
         return modifiers, annotations
 
     @parse_debug
-    def parse_variable_declators(self):
-        declarators = list()
-
-        while True:
-            declarator = self.parse_variable_declator()
-            declarators.append(declarator)
-
-            if not self.try_accept(','):
-                break
-
-        return declarators
-
-    @parse_debug
+    @add_position
     def parse_variable_declarators(self):
         declarators = list()
 
@@ -1226,6 +1235,7 @@ class Parser(object):
 # -- Blocks and statements --
 
     @parse_debug
+    @add_position
     def parse_block(self):
         statements = list()
 
@@ -1239,6 +1249,7 @@ class Parser(object):
         return statements
 
     @parse_debug
+    @add_position
     def parse_block_statement(self):
         if self.would_accept(Identifier, ':'):
             # Labeled statement
@@ -1306,6 +1317,7 @@ class Parser(object):
             return self.parse_statement()
 
     @parse_debug
+    @add_position
     def parse_local_variable_declaration_statement(self):
         modifiers, annotations = self.parse_variable_modifiers()
         java_type = self.parse_type()
@@ -1494,6 +1506,7 @@ class Parser(object):
         return catches
 
     @parse_debug
+    @add_position
     def parse_catch_clause(self):
         self.accept('catch', '(')
 
@@ -1533,6 +1546,7 @@ class Parser(object):
         return resources
 
     @parse_debug
+    @add_position
     def parse_resource(self):
         modifiers, annotations = self.parse_variable_modifiers()
         reference_type = self.parse_reference_type()
@@ -1562,6 +1576,7 @@ class Parser(object):
         return statement_groups
 
     @parse_debug
+    @add_position
     def parse_switch_block_statement_group(self):
         labels = list()
         statements = list()
@@ -1593,6 +1608,7 @@ class Parser(object):
                                         statements=statements)
 
     @parse_debug
+    @add_position
     def parse_for_control(self):
         # Try for_var_control and fall back to normal three part for control
 
@@ -1703,6 +1719,7 @@ class Parser(object):
 # -- Expressions --
 
     @parse_debug
+    @add_position
     def parse_expression(self):
         expressionl = self.parse_expressionl()
         assignment_type = None
@@ -1718,6 +1735,7 @@ class Parser(object):
             return expressionl
 
     @parse_debug
+    @add_position
     def parse_expressionl(self):
         expression_2 = self.parse_expression_2()
         true_expression = None
@@ -1950,6 +1968,7 @@ class Parser(object):
         self.illegal("Expected expression")
 
     @parse_debug
+    @add_position
     def parse_literal(self):
         literal = self.accept(Literal)
         return tree.Literal(value=literal)
@@ -2342,3 +2361,4 @@ def parse(tokens, debug=False):
     parser = Parser(tokens)
     parser.set_debug(debug)
     return parser.parse()
+
