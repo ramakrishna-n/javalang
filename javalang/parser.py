@@ -450,6 +450,7 @@ class Parser(object):
                                          body=body)
 
     @parse_debug
+    @add_position
     def parse_annotation_type_declaration(self):
         name = None
         body = None
@@ -1066,6 +1067,7 @@ class Parser(object):
                                        initializer=initializer)
 
     @parse_debug
+    @add_position
     def parse_interface_method_declarator_rest(self):
         parameters = self.parse_formal_parameters()
         array_dimension = self.parse_array_dimension()
@@ -1081,6 +1083,7 @@ class Parser(object):
                                       return_type=tree.Type(dimensions=array_dimension))
 
     @parse_debug
+    @add_position
     def parse_void_interface_method_declarator_rest(self):
         parameters = self.parse_formal_parameters()
         throws = None
@@ -1094,6 +1097,7 @@ class Parser(object):
                                       throws=throws)
 
     @parse_debug
+    @add_position
     def parse_interface_generic_method_declarator(self):
         type_parameters = self.parse_type_parameters()
         return_type = None
@@ -1169,7 +1173,6 @@ class Parser(object):
         return modifiers, annotations
 
     @parse_debug
-    @add_position
     def parse_variable_declarators(self):
         declarators = list()
 
@@ -1183,6 +1186,7 @@ class Parser(object):
         return declarators
 
     @parse_debug
+    @add_position
     def parse_variable_declarator(self):
         identifier = self.parse_identifier()
         array_dimension, initializer = self.parse_variable_declarator_rest()
@@ -1209,6 +1213,7 @@ class Parser(object):
             return self.parse_expression()
 
     @parse_debug
+    @add_position
     def parse_array_initializer(self):
         array_initializer = tree.ArrayInitializer(initializers=list())
 
@@ -1235,7 +1240,6 @@ class Parser(object):
 # -- Blocks and statements --
 
     @parse_debug
-    @add_position
     def parse_block(self):
         statements = list()
 
@@ -1331,6 +1335,7 @@ class Parser(object):
         return var
 
     @parse_debug
+    @add_position
     def parse_statement(self):
         token = self.tokens.look()
         if self.would_accept('{'):
@@ -1639,6 +1644,7 @@ class Parser(object):
                                update=update)
 
     @parse_debug
+    @add_position
     def parse_for_var_control(self):
         modifiers, annotations = self.parse_variable_modifiers()
         var_type = self.parse_type()
@@ -1693,7 +1699,7 @@ class Parser(object):
 
         if self.try_accept('='):
             initializer = self.parse_variable_initializer()
-
+        #TODO
         declarators = [tree.VariableDeclarator(initializer=initializer)]
 
         while self.try_accept(','):
@@ -1794,6 +1800,7 @@ class Parser(object):
 # -- Expression operators --
 
     @parse_debug
+    @add_position
     def parse_expression_3(self):
         prefix_operators = list()
         while self.tokens.look().value in Operator.PREFIX:
@@ -1843,12 +1850,14 @@ class Parser(object):
         if self.would_accept('<'):
             type_arguments = self.parse_nonwildcard_type_arguments()
         if self.would_accept('new'):
+            #TODO
             method_reference = tree.MemberReference(member=self.accept('new'))
         else:
             method_reference = self.parse_expression()
         return method_reference, type_arguments
 
     @parse_debug
+    @add_position
     def parse_lambda_expression(self):
         lambda_expr = None
         parameters = None
@@ -1893,6 +1902,7 @@ class Parser(object):
 # -- Primary expressions --
 
     @parse_debug
+    @add_position
     def parse_primary(self):
         token = self.tokens.look()
 
@@ -2002,6 +2012,7 @@ class Parser(object):
         return expressions
 
     @parse_debug
+    @add_position
     def parse_super_suffix(self):
         identifier = None
         type_arguments = None
@@ -2028,6 +2039,7 @@ class Parser(object):
             return tree.SuperMemberReference(member=identifier)
 
     @parse_debug
+    @add_position
     def parse_explicit_generic_invocation_suffix(self):
         identifier = None
         arguments = None
@@ -2043,6 +2055,7 @@ class Parser(object):
 # -- Creators --
 
     @parse_debug
+    @add_position
     def parse_creator(self):
         constructor_type_arguments = None
 
@@ -2072,6 +2085,7 @@ class Parser(object):
                                      body=body)
 
     @parse_debug
+    @add_position
     def parse_created_name(self):
         created_name = tree.ReferenceType()
         tail = created_name
@@ -2101,6 +2115,7 @@ class Parser(object):
         return (arguments, class_body)
 
     @parse_debug
+    @add_position
     def parse_array_creator_rest(self):
         if self.would_accept('[', ']'):
             array_dimension = self.parse_array_dimension()
@@ -2171,6 +2186,7 @@ class Parser(object):
         return invocation
 
     @parse_debug
+    @add_position
     def parse_inner_creator(self):
         identifier = self.parse_identifier()
         type_arguments = None
@@ -2188,6 +2204,7 @@ class Parser(object):
                                       body=class_body)
 
     @parse_debug
+    @add_position
     def parse_selector(self):
         if self.try_accept('['):
             expression = self.parse_expression()
@@ -2234,6 +2251,7 @@ class Parser(object):
 # -- Enum and annotation body --
 
     @parse_debug
+    @add_position
     def parse_enum_body(self):
         constants = list()
         body_declarations = list()
@@ -2261,6 +2279,7 @@ class Parser(object):
                              declarations=body_declarations)
 
     @parse_debug
+    @add_position
     def parse_enum_constant(self):
         annotations = list()
         javadoc = None
@@ -2310,6 +2329,7 @@ class Parser(object):
         return declarations
 
     @parse_debug
+    @add_position
     def parse_annotation_type_element_declaration(self):
         modifiers, annotations, javadoc = self.parse_modifiers()
         declaration = None
@@ -2342,6 +2362,7 @@ class Parser(object):
         return declaration
 
     @parse_debug
+    @add_position
     def parse_annotation_method_or_constant_rest(self):
         if self.try_accept('('):
             self.accept(')')
