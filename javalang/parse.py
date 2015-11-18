@@ -47,6 +47,12 @@ def parse_type_signature(sig):
 
     return parser.parse_class_or_interface_declaration()
 
+def parse_statement(stmt):
+    stmt = '{' + stmt + '}' 
+    tokens = tokenize(stmt)
+    parser = Parser(tokens)
+    return parser.parse_block()[0]
+
 def parse(s):
     tokens = tokenize(s)
     parser = Parser(tokens)
