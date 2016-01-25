@@ -61,7 +61,7 @@ def parse_debug(method):
 
 
 def add_position(method):
-    
+
     def _method(self):
         start = self.tokens.look().position
         node = method(self)
@@ -72,7 +72,7 @@ def add_position(method):
         return node
 
     return _method
-    
+
 # ------------------------------------------------------------------------------
 # ---- Parsing exception ----
 
@@ -275,6 +275,7 @@ class Parser(object):
 # -- Top level units --
 
     @parse_debug
+    @add_position
     def parse_compilation_unit(self):
         package = None
         package_annotations = None
@@ -1002,6 +1003,23 @@ class Parser(object):
             method_name = self.parse_identifier()
             declaration = self.parse_void_interface_method_declarator_rest()
             declaration.name = method_name
+        elif self.try_accept('default'):
+            token = self.tokens.look()
+            if self.try_accept('void'):
+                method_name = self.parse_identifier()
+                member = self.parse_void_method_declarator_rest()
+                member.name = method_name
+                declaration = member
+            elif token.value == '<':
+                declaration = self.parse_generic_method_or_constructor_declaration()
+            else:
+                member_type = self.parse_type()
+                member_name = self.parse_identifier()
+                member = self.parse_method_or_field_rest()
+                member_type.dimensions += member.return_type.dimensions
+                member.name = member_name
+                member.return_type = member_type
+                declaration = member
         else:
             declaration = self.parse_interface_method_or_field_declaration()
 
